@@ -57,6 +57,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import {
   Table,
   TableBody,
@@ -66,6 +67,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 const stats = [
@@ -149,17 +151,15 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2 font-semibold">
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              A
-            </span>
-            Acme Team
-          </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <SidebarTrigger />
+          <Separator orientation="vertical" className="h-4" />
+          <span className="text-sm font-medium">Dashboard</span>
 
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="icon">
               <BellIcon className="size-4" />
               <span className="sr-only">Notifications</span>
@@ -189,10 +189,9 @@ export default function Home() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 space-y-8 px-6 py-8">
+        <div className="w-full flex-1 space-y-8 px-6 py-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
@@ -372,7 +371,8 @@ export default function Home() {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

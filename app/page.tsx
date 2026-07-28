@@ -1,65 +1,378 @@
-import Image from "next/image";
+"use client"
+
+import * as React from "react"
+import { toast } from "sonner"
+import {
+  ArrowUpRightIcon,
+  BellIcon,
+  PlusIcon,
+  UsersIcon,
+  ActivityIcon,
+  FolderKanbanIcon,
+  TrendingUpIcon,
+} from "lucide-react"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ThemeToggle } from "@/components/theme-toggle"
+
+const stats = [
+  {
+    label: "Team members",
+    value: "24",
+    change: "+3 this month",
+    icon: UsersIcon,
+  },
+  {
+    label: "Active projects",
+    value: "12",
+    change: "+2 this month",
+    icon: FolderKanbanIcon,
+  },
+  {
+    label: "Tasks completed",
+    value: "318",
+    change: "+18% vs last month",
+    icon: ActivityIcon,
+  },
+  {
+    label: "Avg. velocity",
+    value: "42 pts",
+    change: "+6 pts",
+    icon: TrendingUpIcon,
+  },
+]
+
+type Member = {
+  name: string
+  email: string
+  role: string
+  status: "Active" | "Invited" | "Away"
+}
+
+const initialMembers: Member[] = [
+  { name: "Ava Chen", email: "ava@acme.dev", role: "Engineering", status: "Active" },
+  { name: "Marcus Lee", email: "marcus@acme.dev", role: "Design", status: "Active" },
+  { name: "Priya Nair", email: "priya@acme.dev", role: "Product", status: "Away" },
+  { name: "Diego Santos", email: "diego@acme.dev", role: "Engineering", status: "Invited" },
+]
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+}
+
+function statusVariant(status: Member["status"]) {
+  if (status === "Active") return "default"
+  if (status === "Invited") return "secondary"
+  return "outline"
+}
 
 export default function Home() {
+  const [members, setMembers] = React.useState<Member[]>(initialMembers)
+  const [open, setOpen] = React.useState(false)
+  const [name, setName] = React.useState("")
+  const [email, setEmail] = React.useState("")
+  const [role, setRole] = React.useState("")
+
+  function handleAddMember(event: React.FormEvent) {
+    event.preventDefault()
+    if (!name || !email || !role) {
+      toast.error("Fill out every field before adding a member.")
+      return
+    }
+
+    setMembers((prev) => [
+      ...prev,
+      { name, email, role, status: "Invited" },
+    ])
+    toast.success(`Invited ${name} to the team`)
+    setName("")
+    setEmail("")
+    setRole("")
+    setOpen(false)
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+          <div className="flex items-center gap-2 font-semibold">
+            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              A
+            </span>
+            Acme Team
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon">
+              <BellIcon className="size-4" />
+              <span className="sr-only">Notifications</span>
+            </Button>
+
+            <ThemeToggle />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button variant="ghost" className="h-8 gap-2 px-2">
+                    <Avatar className="size-6">
+                      <AvatarImage src="" alt="Jaime" />
+                      <AvatarFallback>JB</AvatarFallback>
+                    </Avatar>
+                    <span className="hidden text-sm sm:inline">Jaime</span>
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Log out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </header>
+
+      <main className="mx-auto w-full max-w-6xl flex-1 space-y-8 px-6 py-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">
+              An overview of your team&apos;s activity this month.
+            </p>
+          </div>
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger
+              render={
+                <Button>
+                  <PlusIcon className="size-4" />
+                  Add member
+                </Button>
+              }
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <DialogContent className="sm:max-w-md">
+              <form onSubmit={handleAddMember}>
+                <DialogHeader>
+                  <DialogTitle>Add team member</DialogTitle>
+                  <DialogDescription>
+                    Invite someone new to Acme Team. They&apos;ll get an email
+                    with instructions to join.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <FieldGroup className="py-4">
+                  <Field>
+                    <FieldLabel htmlFor="member-name">Full name</FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id="member-name"
+                        placeholder="Jordan Rivera"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </FieldContent>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="member-email">Email</FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id="member-email"
+                        type="email"
+                        placeholder="jordan@acme.dev"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </FieldContent>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="member-role">Team</FieldLabel>
+                    <FieldContent>
+                      <Select
+                        value={role}
+                        onValueChange={(value) => setRole(value ?? "")}
+                      >
+                        <SelectTrigger id="member-role" className="w-full">
+                          <SelectValue placeholder="Select a team" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Engineering">Engineering</SelectItem>
+                          <SelectItem value="Design">Design</SelectItem>
+                          <SelectItem value="Product">Product</SelectItem>
+                          <SelectItem value="Marketing">Marketing</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FieldContent>
+                  </Field>
+                </FieldGroup>
+
+                <DialogFooter>
+                  <DialogClose
+                    render={
+                      <Button variant="outline" type="button">
+                        Cancel
+                      </Button>
+                    }
+                  />
+                  <Button type="submit">Send invite</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <Card key={stat.label}>
+              <CardHeader>
+                <CardDescription>{stat.label}</CardDescription>
+                <CardTitle className="text-3xl">{stat.value}</CardTitle>
+                <CardAction>
+                  <stat.icon className="size-5 text-muted-foreground" />
+                </CardAction>
+              </CardHeader>
+              <CardFooter>
+                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <ArrowUpRightIcon className="size-3 text-emerald-500" />
+                  {stat.change}
+                </p>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+
+        <Tabs defaultValue="team">
+          <TabsList>
+            <TabsTrigger value="team">Team</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="team">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team members</CardTitle>
+                <CardDescription>
+                  Everyone with access to this workspace.
+                </CardDescription>
+              </CardHeader>
+              <Separator />
+              <CardContent className="pt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Member</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {members.map((member) => (
+                      <TableRow key={member.email}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="size-8">
+                              <AvatarFallback>
+                                {initials(member.name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium leading-none">
+                                {member.name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {member.email}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{member.role}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant(member.status)}>
+                            {member.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="activity">
+            <Card>
+              <CardHeader>
+                <CardTitle>Activity</CardTitle>
+                <CardDescription>
+                  Nothing wired up here yet — swap in real data whenever
+                  you&apos;re ready.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
-  );
+  )
 }

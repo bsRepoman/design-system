@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -127,4 +127,122 @@
   html {
     @apply font-sans;
   }
+}
+
+/*
+  Live preset lab: approximates the font + corner-radius personality of
+  four shadcn presets that all share the same neutral base color. Each
+  preset's real components hardcode a different literal radius utility
+  (rounded-lg/md/4xl/2xl) rather than reading --radius, so this scales
+  --radius to the equivalent pixel value instead of swapping component
+  files. Toggle with [data-preset] on <html>; see components/theme-lab.tsx.
+
+  font-family is set directly (not via --font-sans) because Tailwind's
+  `@theme inline` bakes --font-geist-sans straight into the compiled
+  .font-sans utility at build time, so overriding --font-sans at runtime
+  has no effect on it.
+*/
+html[data-preset="nova"] {
+  --radius: 0.625rem;
+  font-family: var(--font-geist-sans);
+}
+html[data-preset="vega"] {
+  --radius: 0.5rem;
+  font-family: var(--font-inter);
+}
+html[data-preset="luma"] {
+  --radius: 1.625rem;
+  font-family: var(--font-inter);
+}
+html[data-preset="rhea"] {
+  --radius: 1.125rem;
+  font-family: var(--font-inter);
+}
+
+/*
+  Color lab: swaps the accent identity (primary/ring/chart/sidebar-primary)
+  across a few hues. Surfaces (background/card/border/muted) stay neutral
+  gray in every option — that's deliberate, not a limitation: it's the same
+  pattern shadcn's own theme picker and most production dashboards use,
+  since fully-tinted backgrounds usually hurt legibility. Toggle with
+  [data-color] on <html>; see components/theme-lab.tsx.
+*/
+html[data-color="blue"] {
+  --primary: oklch(0.55 0.19 258);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.7 0.13 258);
+  --chart-1: oklch(0.75 0.14 258);
+  --chart-2: oklch(0.65 0.17 258);
+  --chart-3: oklch(0.55 0.19 258);
+  --chart-4: oklch(0.45 0.17 258);
+  --chart-5: oklch(0.35 0.14 258);
+  --sidebar-primary: oklch(0.55 0.19 258);
+  --sidebar-ring: oklch(0.7 0.13 258);
+}
+html.dark[data-color="blue"] {
+  --primary: oklch(0.72 0.16 258);
+  --primary-foreground: oklch(0.18 0.03 258);
+  --ring: oklch(0.6 0.15 258);
+  --sidebar-primary: oklch(0.72 0.16 258);
+  --sidebar-ring: oklch(0.6 0.15 258);
+}
+
+html[data-color="green"] {
+  --primary: oklch(0.55 0.16 150);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.7 0.12 150);
+  --chart-1: oklch(0.75 0.13 150);
+  --chart-2: oklch(0.65 0.15 150);
+  --chart-3: oklch(0.55 0.16 150);
+  --chart-4: oklch(0.45 0.15 150);
+  --chart-5: oklch(0.35 0.13 150);
+  --sidebar-primary: oklch(0.55 0.16 150);
+  --sidebar-ring: oklch(0.7 0.12 150);
+}
+html.dark[data-color="green"] {
+  --primary: oklch(0.72 0.15 150);
+  --primary-foreground: oklch(0.18 0.03 150);
+  --ring: oklch(0.6 0.14 150);
+  --sidebar-primary: oklch(0.72 0.15 150);
+  --sidebar-ring: oklch(0.6 0.14 150);
+}
+
+html[data-color="violet"] {
+  --primary: oklch(0.55 0.2 300);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.7 0.14 300);
+  --chart-1: oklch(0.75 0.15 300);
+  --chart-2: oklch(0.65 0.18 300);
+  --chart-3: oklch(0.55 0.2 300);
+  --chart-4: oklch(0.45 0.18 300);
+  --chart-5: oklch(0.35 0.15 300);
+  --sidebar-primary: oklch(0.55 0.2 300);
+  --sidebar-ring: oklch(0.7 0.14 300);
+}
+html.dark[data-color="violet"] {
+  --primary: oklch(0.72 0.17 300);
+  --primary-foreground: oklch(0.18 0.03 300);
+  --ring: oklch(0.6 0.16 300);
+  --sidebar-primary: oklch(0.72 0.17 300);
+  --sidebar-ring: oklch(0.6 0.16 300);
+}
+
+html[data-color="rose"] {
+  --primary: oklch(0.55 0.21 20);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.7 0.14 20);
+  --chart-1: oklch(0.75 0.15 20);
+  --chart-2: oklch(0.65 0.18 20);
+  --chart-3: oklch(0.55 0.21 20);
+  --chart-4: oklch(0.45 0.19 20);
+  --chart-5: oklch(0.35 0.16 20);
+  --sidebar-primary: oklch(0.55 0.21 20);
+  --sidebar-ring: oklch(0.7 0.14 20);
+}
+html.dark[data-color="rose"] {
+  --primary: oklch(0.72 0.18 20);
+  --primary-foreground: oklch(0.18 0.03 20);
+  --ring: oklch(0.6 0.17 20);
+  --sidebar-primary: oklch(0.72 0.18 20);
+  --sidebar-ring: oklch(0.6 0.17 20);
 }

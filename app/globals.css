@@ -4,6 +4,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Tabs, Field and Separator style themselves with `data-horizontal:` and
+   `data-vertical:`. Without these declarations Tailwind resolves those to the
+   bare [data-horizontal] / [data-vertical] attributes, which Base UI does not
+   emit - it sets data-orientation="horizontal" instead - so the rules never
+   match and the components lose their orientation styling entirely. Both
+   selectors are listed so anything that does set the bare attribute keeps
+   working. Found 2026-09-03 via PIIRedact, the first consumer to render Tabs:
+   the tab strip stretched to 190px because group-data-horizontal/tabs:h-8
+   never applied. */
+@custom-variant data-horizontal (&[data-orientation="horizontal"], &[data-horizontal]);
+@custom-variant data-vertical (&[data-orientation="vertical"], &[data-vertical]);
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -56,7 +56,15 @@ mkdirSync(OUT_DIR, { recursive: true })
 const tokensCss = `/* Generated from ${SOURCE} by scripts/build-tokens.mjs. Do not edit directly. */\n\n${rootBlock}\n\n${darkBlock}\n`
 writeFileSync(`${OUT_DIR}/tokens.css`, tokensCss)
 
-const themeCss = `/* Generated from ${SOURCE} by scripts/build-tokens.mjs. Do not edit directly. */\n\n@import "./tokens.css";\n\n@custom-variant dark (&:is(.dark *));\n\n${themeInlineBlock}\n`
+// Carry over EVERY @custom-variant, not just `dark`. This used to hardcode the
+// dark variant alone, so the orientation variants the components depend on
+// never reached consumers - the components looked correct in this repo's own
+// app and broke in anything that installed the package.
+const customVariants = [...source.matchAll(/^@custom-variant .+$/gm)]
+  .map((m) => m[0])
+  .join("\n")
+
+const themeCss = `/* Generated from ${SOURCE} by scripts/build-tokens.mjs. Do not edit directly. */\n\n@import "./tokens.css";\n\n${customVariants}\n\n${themeInlineBlock}\n`
 writeFileSync(`${OUT_DIR}/theme.css`, themeCss)
 
 console.log(`Wrote ${OUT_DIR}/tokens.css and ${OUT_DIR}/theme.css`)

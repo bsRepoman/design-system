@@ -67,6 +67,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeLab } from "@/components/theme-lab"
@@ -125,6 +133,30 @@ function statusVariant(status: Member["status"]) {
   if (status === "Active") return "default"
   if (status === "Invited") return "secondary"
   return "outline"
+}
+
+const revenue = [
+  { month: "Jan", realised: 1934, booked: 0, prior: 2364 },
+  { month: "Feb", realised: 3797, booked: 0, prior: 3387 },
+  { month: "Mar", realised: 1400, booked: 0, prior: 410 },
+  { month: "Apr", realised: 556, booked: 0, prior: 1063 },
+  { month: "May", realised: 2363, booked: 0, prior: 1880 },
+  { month: "Jun", realised: 1775, booked: 0, prior: 1893 },
+  { month: "Jul", realised: 4760, booked: 0, prior: 2276 },
+  { month: "Aug", realised: 6282, booked: 0, prior: 4544 },
+  { month: "Sep", realised: 0, booked: 2217, prior: 785 },
+  { month: "Oct", realised: 0, booked: 1912, prior: 3199 },
+  { month: "Nov", realised: 0, booked: 890, prior: 2153 },
+  { month: "Dec", realised: 0, booked: 0, prior: 2183 },
+]
+
+// `realised` and `booked` share a stack; `prior` gets its own, so it renders
+// beside the stack rather than inside it. That grouped-and-stacked shape is the
+// one a revenue chart actually needs.
+const revenueConfig = {
+  realised: { label: "Realised", color: "var(--chart-1)" },
+  booked: { label: "Booked", color: "var(--chart-2)" },
+  prior: { label: "Prior year", color: "var(--chart-4)" },
 }
 
 export default function Home() {
@@ -304,6 +336,34 @@ export default function Home() {
             </Card>
           ))}
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue</CardTitle>
+            <CardDescription>
+              Realised and booked stacked together, against the prior year.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={revenueConfig} className="h-[260px] w-full">
+              <BarChart data={revenue} accessibilityLayer>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={64}
+                  tickFormatter={(v) => `$${v.toLocaleString()}`}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Bar dataKey="realised" stackId="a" fill="var(--color-realised)" radius={2} maxBarSize={22} />
+                <Bar dataKey="booked" stackId="a" fill="var(--color-booked)" radius={2} maxBarSize={22} />
+                <Bar dataKey="prior" stackId="b" fill="var(--color-prior)" radius={2} maxBarSize={22} />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="team">
           <TabsList>

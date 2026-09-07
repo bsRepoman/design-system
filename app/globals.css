@@ -37,6 +37,9 @@
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-border-strong: var(--border-strong);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+  --color-link-active: var(--link-active);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
@@ -82,6 +85,16 @@
      anything that is the sole boundary of an interactive element uses this,
      which clears 3:1 on both grounds (light 3.64:1, dark 5.44:1). */
   --border-strong: oklch(0.62 0 0);
+  /* A link colour is SEMANTIC, not decoration, so it is fixed rather than
+     derived from the accent: --primary in this base theme is a near-black
+     neutral and neutral is the DEFAULT accent, which would ship links looking
+     exactly like body text. Hue 258 is the blue accent's own hue, so the two
+     never read as a mistake when both are on screen. No --link-visited: an
+     operations console has no "already read". Measured 2026-09-07.
+     6.12:1 on --background. */
+  --link: oklch(0.50 0.16 258);
+  --link-hover: oklch(0.42 0.17 258);
+  --link-active: oklch(0.36 0.16 258);
   --input: oklch(0.922 0 0);
   /* WCAG 2.2 wants 3:1 for a focus indicator; 0.708 measured 2.59:1. */
   --ring: oklch(0.62 0 0);
@@ -122,6 +135,17 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --border-strong: oklch(0.62 0 0);
+  /* A link colour is SEMANTIC, not decoration, so it is fixed rather than
+     derived from the accent: --primary in this base theme is a near-black
+     neutral and neutral is the DEFAULT accent, which would ship links looking
+     exactly like body text. Hue 258 is the blue accent's own hue, so the two
+     never read as a mistake when both are on screen. No --link-visited: an
+     operations console has no "already read". Measured 2026-09-07.
+     7.07:1 on --card. Hover goes LIGHTER here: darkening a light-on-dark link
+     inverts the affordance, the same trap the destructive hover states hit. */
+  --link: oklch(0.72 0.16 258);
+  --link-hover: oklch(0.80 0.14 258);
+  --link-active: oklch(0.86 0.11 258);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   /* These used to be identical to the light values, which put chart-3, -4 and

@@ -357,9 +357,9 @@ export default function Home() {
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
-                <Bar dataKey="realised" stackId="a" fill="var(--color-realised)" radius={2} maxBarSize={22} />
-                <Bar dataKey="booked" stackId="a" fill="var(--color-booked)" radius={2} maxBarSize={22} />
-                <Bar dataKey="prior" stackId="b" fill="var(--color-prior)" radius={2} maxBarSize={22} />
+                <Bar dataKey="realised" stackId="a" fill="var(--color-realised)" radius={2} maxBarSize={22} isAnimationActive={false} />
+                <Bar dataKey="booked" stackId="a" fill="var(--color-booked)" radius={2} maxBarSize={22} isAnimationActive={false} />
+                <Bar dataKey="prior" stackId="b" fill="var(--color-prior)" radius={2} maxBarSize={22} isAnimationActive={false} />
               </BarChart>
             </ChartContainer>
           </CardContent>

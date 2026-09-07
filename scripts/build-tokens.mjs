@@ -53,7 +53,17 @@ const themeInlineBlock = extractBlock(source, "@theme inline")
 
 mkdirSync(OUT_DIR, { recursive: true })
 
-const tokensCss = `/* Generated from ${SOURCE} by scripts/build-tokens.mjs. Do not edit directly. */\n\n${rootBlock}\n\n${darkBlock}\n`
+// Carry over EVERY themed variant block too, not just :root and .dark. The
+// accent system (html[data-color=...] and its html.dark[...] pair) and the
+// preset system (html[data-preset=...]) lived only in this repo's own
+// globals.css and never reached a consumer -- so an app that set data-color
+// got the base neutral palette and no error. Same class of bug as the
+// @custom-variant one fixed below, one layer up.
+const variantBlocks = [...source.matchAll(/^html(?:\.dark)?\[data-(?:color|preset)="[^"]+"\]/gm)]
+  .map((m) => extractBlock(source, m[0]))
+  .join("\n\n")
+
+const tokensCss = `/* Generated from ${SOURCE} by scripts/build-tokens.mjs. Do not edit directly. */\n\n${rootBlock}\n\n${darkBlock}\n\n${variantBlocks}\n`
 writeFileSync(`${OUT_DIR}/tokens.css`, tokensCss)
 
 // Carry over EVERY @custom-variant, not just `dark`. This used to hardcode the

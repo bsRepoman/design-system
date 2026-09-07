@@ -36,6 +36,7 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
@@ -77,13 +78,21 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
+  /* For a control identified by its border alone. --border stays decorative;
+     anything that is the sole boundary of an interactive element uses this,
+     which clears 3:1 on both grounds (light 3.64:1, dark 5.44:1). */
+  --border-strong: oklch(0.62 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* WCAG 2.2 wants 3:1 for a focus indicator; 0.708 measured 2.59:1. */
+  --ring: oklch(0.62 0 0);
+  /* Chart series are non-text elements and owe 3:1. On white that caps
+     lightness at 0.669, so the ramp descends from there. The dark block
+     below runs the opposite direction rather than repeating these values. */
+  --chart-1: oklch(0.66 0 0);
+  --chart-2: oklch(0.56 0 0);
+  --chart-3: oklch(0.46 0 0);
+  --chart-4: oklch(0.36 0 0);
+  --chart-5: oklch(0.26 0 0);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -112,13 +121,17 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
+  --border-strong: oklch(0.62 0 0);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* These used to be identical to the light values, which put chart-3, -4 and
+     -5 darker than the 0.145 background -- effectively invisible. On this
+     ground 3:1 needs lightness at or above 0.478, so the ramp ascends. */
+  --chart-1: oklch(0.50 0 0);
+  --chart-2: oklch(0.60 0 0);
+  --chart-3: oklch(0.70 0 0);
+  --chart-4: oklch(0.80 0 0);
+  --chart-5: oklch(0.90 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);

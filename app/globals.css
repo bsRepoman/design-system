@@ -85,13 +85,14 @@
      anything that is the sole boundary of an interactive element uses this,
      which clears 3:1 on both grounds (light 3.64:1, dark 5.44:1). */
   --border-strong: oklch(0.62 0 0);
-  /* A link colour is SEMANTIC, not decoration, so it is fixed rather than
-     derived from the accent: --primary in this base theme is a near-black
-     neutral and neutral is the DEFAULT accent, which would ship links looking
-     exactly like body text. Hue 258 is the blue accent's own hue, so the two
-     never read as a mistake when both are on screen. No --link-visited: an
-     operations console has no "already read". Measured 2026-09-07.
-     6.12:1 on --background. */
+  /* THE LINK FALLBACK. A link colour is SEMANTIC, so it never derives from
+     --primary: --primary in this base theme is a near-black neutral and neutral
+     is the DEFAULT accent, so a --primary-derived link would ship looking
+     exactly like body text. Each named accent below overrides this triple with
+     its own hue (see html[data-color=...]); a neutral accent falls back to
+     this. Hue 258 is the blue accent's own hue, so blue needs no override at
+     all. No --link-visited: an operations console has no "already read".
+     Measured 2026-09-07. 6.12:1 on --background. */
   --link: oklch(0.50 0.16 258);
   --link-hover: oklch(0.42 0.17 258);
   --link-active: oklch(0.36 0.16 258);
@@ -135,14 +136,12 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --border-strong: oklch(0.62 0 0);
-  /* A link colour is SEMANTIC, not decoration, so it is fixed rather than
-     derived from the accent: --primary in this base theme is a near-black
-     neutral and neutral is the DEFAULT accent, which would ship links looking
-     exactly like body text. Hue 258 is the blue accent's own hue, so the two
-     never read as a mistake when both are on screen. No --link-visited: an
-     operations console has no "already read". Measured 2026-09-07.
-     7.07:1 on --card. Hover goes LIGHTER here: darkening a light-on-dark link
-     inverts the affordance, the same trap the destructive hover states hit. */
+  /* THE LINK FALLBACK -- see :root for why it is not --primary-derived. Each
+     named accent below overrides it; a neutral accent falls back to this, and
+     hue 258 is the blue accent's own hue so blue needs no override.
+     No --link-visited. Measured 2026-09-07. 7.07:1 on --card. Hover goes
+     LIGHTER here: darkening a light-on-dark link inverts the affordance, the
+     same trap the destructive hover states hit. */
   --link: oklch(0.72 0.16 258);
   --link-hover: oklch(0.80 0.14 258);
   --link-active: oklch(0.86 0.11 258);
@@ -216,6 +215,8 @@ html[data-preset="rhea"] {
   since fully-tinted backgrounds usually hurt legibility. Toggle with
   [data-color] on <html>; see components/theme-lab.tsx.
 */
+/* Blue sets no --link triple deliberately: the :root/.dark fallback is already
+   hue 258, so blue and neutral share one link colour. */
 html[data-color="blue"] {
   --primary: oklch(0.55 0.19 258);
   --primary-foreground: oklch(0.985 0 0);
@@ -247,6 +248,14 @@ html[data-color="green"] {
   --chart-5: oklch(0.35 0.13 150);
   --sidebar-primary: oklch(0.55 0.16 150);
   --sidebar-ring: oklch(0.7 0.12 150);
+  /* Accent-derived link, chroma GAMUT-FITTED: hue 150 at blue's chroma falls
+     outside sRGB at these lightnesses, so the browser would clip it and render
+     something duller than the token claimed. These are the most this hue holds,
+     so each renders as written. 5.65:1, 8.04:1, 10.44:1 on --background.
+     Measured 2026-09-08. */
+  --link: oklch(0.50 0.13 150);
+  --link-hover: oklch(0.42 0.11 150);
+  --link-active: oklch(0.36 0.09 150);
 }
 html.dark[data-color="green"] {
   --primary: oklch(0.72 0.15 150);
@@ -254,6 +263,10 @@ html.dark[data-color="green"] {
   --ring: oklch(0.6 0.14 150);
   --sidebar-primary: oklch(0.72 0.15 150);
   --sidebar-ring: oklch(0.6 0.14 150);
+  /* 7.70:1, 10.11:1, 12.18:1 on --card. Hover goes LIGHTER, as in .dark. */
+  --link: oklch(0.72 0.16 150);
+  --link-hover: oklch(0.80 0.14 150);
+  --link-active: oklch(0.86 0.11 150);
 }
 
 html[data-color="violet"] {
@@ -267,6 +280,11 @@ html[data-color="violet"] {
   --chart-5: oklch(0.35 0.15 300);
   --sidebar-primary: oklch(0.55 0.2 300);
   --sidebar-ring: oklch(0.7 0.14 300);
+  /* Accent-derived link. 6.46:1, 9.22:1, 11.75:1 on --background.
+     Measured 2026-09-08. */
+  --link: oklch(0.50 0.16 300);
+  --link-hover: oklch(0.42 0.17 300);
+  --link-active: oklch(0.36 0.16 300);
 }
 html.dark[data-color="violet"] {
   --primary: oklch(0.72 0.17 300);
@@ -274,6 +292,11 @@ html.dark[data-color="violet"] {
   --ring: oklch(0.6 0.16 300);
   --sidebar-primary: oklch(0.72 0.17 300);
   --sidebar-ring: oklch(0.6 0.16 300);
+  /* Hover/active chroma gamut-fitted; see the green block. 6.82:1, 9.28:1,
+     11.45:1 on --card. Hover goes LIGHTER, as in .dark. */
+  --link: oklch(0.72 0.16 300);
+  --link-hover: oklch(0.80 0.11 300);
+  --link-active: oklch(0.86 0.08 300);
 }
 
 html[data-color="rose"] {
@@ -287,6 +310,11 @@ html[data-color="rose"] {
   --chart-5: oklch(0.35 0.16 20);
   --sidebar-primary: oklch(0.55 0.21 20);
   --sidebar-ring: oklch(0.7 0.14 20);
+  /* Accent-derived link, hover/active chroma gamut-fitted; see the green
+     block. 6.53:1, 9.21:1, 11.65:1 on --background. Measured 2026-09-08. */
+  --link: oklch(0.50 0.16 20);
+  --link-hover: oklch(0.42 0.16 20);
+  --link-active: oklch(0.36 0.14 20);
 }
 html.dark[data-color="rose"] {
   --primary: oklch(0.72 0.18 20);
@@ -294,4 +322,9 @@ html.dark[data-color="rose"] {
   --ring: oklch(0.6 0.17 20);
   --sidebar-primary: oklch(0.72 0.18 20);
   --sidebar-ring: oklch(0.6 0.17 20);
+  /* Hover/active chroma gamut-fitted; see the green block. 6.72:1, 9.17:1,
+     11.40:1 on --card. Hover goes LIGHTER, as in .dark. */
+  --link: oklch(0.72 0.16 20);
+  --link-hover: oklch(0.80 0.11 20);
+  --link-active: oklch(0.86 0.07 20);
 }

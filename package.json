@@ -1,6 +1,6 @@
 {
   "name": "@bsrepoman/ui",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "type": "module",
   "files": [
@@ -66,6 +66,11 @@
       "types": "./dist/popover.d.ts",
       "import": "./dist/popover.js",
       "require": "./dist/popover.cjs"
+    },
+    "./radio-group": {
+      "types": "./dist/radio-group.d.ts",
+      "import": "./dist/radio-group.js",
+      "require": "./dist/radio-group.cjs"
     },
     "./segmented-control": {
       "types": "./dist/segmented-control.d.ts",

@@ -77,6 +77,11 @@ import {
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  RadioGroup,
+  RadioGroupCard,
+  RadioGroupItem,
+} from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
@@ -490,6 +495,34 @@ export default function Home() {
                 <SegmentedControlItem value="travel">Travel</SegmentedControlItem>
                 <SegmentedControlItem value="all">All</SegmentedControlItem>
               </SegmentedControl>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <span className="text-xs text-muted-foreground">Radio group</span>
+              <RadioGroup defaultValue="daily" className="flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <RadioGroupItem value="daily" /> Daily
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <RadioGroupItem value="weekly" /> Weekly
+                </label>
+              </RadioGroup>
+              <span className="mt-2 text-xs text-muted-foreground">Swatches</span>
+              <RadioGroup defaultValue="neutral">
+                {[
+                  ["neutral", "oklch(0.205 0 0)"],
+                  ["blue", "oklch(0.55 0.19 258)"],
+                  ["green", "oklch(0.55 0.16 150)"],
+                  ["violet", "oklch(0.55 0.2 300)"],
+                ].map(([key, swatch]) => (
+                  <RadioGroupCard key={key} value={key} aria-label={key} className="size-9">
+                    <span
+                      className="size-5 rounded-full"
+                      style={{ background: swatch }}
+                    />
+                  </RadioGroupCard>
+                ))}
+              </RadioGroup>
             </div>
 
             <div className="flex flex-col gap-2.5">

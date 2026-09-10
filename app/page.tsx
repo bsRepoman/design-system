@@ -76,6 +76,13 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  SegmentedControl,
+  SegmentedControlItem,
+} from "@/components/ui/segmented-control"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeLab } from "@/components/theme-lab"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -435,6 +442,72 @@ export default function Home() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Added 2026-09-09 with the four wrappers over primitives base-ui already
+            shipped. The showcase demos what the package exports; a component that
+            ships and is not shown here is one no consuming app discovers. */}
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Checkbox, Switch, Segmented control, Popover</CardTitle>
+            <CardDescription>
+              Wrappers over base-ui primitives that were already a dependency.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-start gap-8">
+            <div className="flex flex-col gap-2.5">
+              <span className="text-xs text-muted-foreground">Checkbox</span>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox defaultChecked /> Checked
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox /> Unchecked
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox indeterminate /> Indeterminate
+              </label>
+              <label className="flex items-center gap-2 text-sm opacity-60">
+                <Checkbox disabled /> Disabled
+              </label>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <span className="text-xs text-muted-foreground">Switch</span>
+              <label className="flex items-center gap-2 text-sm">
+                <Switch defaultChecked /> On
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <Switch /> Off
+              </label>
+              <label className="flex items-center gap-2 text-sm opacity-60">
+                <Switch disabled /> Disabled
+              </label>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <span className="text-xs text-muted-foreground">Segmented control</span>
+              <SegmentedControl defaultValue={["essential"]}>
+                <SegmentedControlItem value="essential">Essential</SegmentedControlItem>
+                <SegmentedControlItem value="travel">Travel</SegmentedControlItem>
+                <SegmentedControlItem value="all">All</SegmentedControlItem>
+              </SegmentedControl>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <span className="text-xs text-muted-foreground">Popover</span>
+              <Popover>
+                <PopoverTrigger
+                  render={<Button variant="outline">Open popover</Button>}
+                />
+                <PopoverContent className="w-56 p-3">
+                  <p className="text-sm">
+                    Arbitrary content — a filter list, a form, a summary. Outside-click,
+                    Escape and collision flipping come from the primitive.
+                  </p>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </CardContent>
+        </Card>
         </div>
       </SidebarInset>
     </SidebarProvider>

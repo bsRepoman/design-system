@@ -1,6 +1,6 @@
 {
   "name": "@bsrepoman/ui",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "type": "module",
   "files": [
@@ -32,6 +32,11 @@
       "import": "./dist/card.js",
       "require": "./dist/card.cjs"
     },
+    "./checkbox": {
+      "types": "./dist/checkbox.d.ts",
+      "import": "./dist/checkbox.js",
+      "require": "./dist/checkbox.cjs"
+    },
     "./dialog": {
       "types": "./dist/dialog.d.ts",
       "import": "./dist/dialog.js",
@@ -56,6 +61,16 @@
       "types": "./dist/label.d.ts",
       "import": "./dist/label.js",
       "require": "./dist/label.cjs"
+    },
+    "./popover": {
+      "types": "./dist/popover.d.ts",
+      "import": "./dist/popover.js",
+      "require": "./dist/popover.cjs"
+    },
+    "./segmented-control": {
+      "types": "./dist/segmented-control.d.ts",
+      "import": "./dist/segmented-control.js",
+      "require": "./dist/segmented-control.cjs"
     },
     "./select": {
       "types": "./dist/select.d.ts",
@@ -87,6 +102,12 @@
       "import": "./dist/sonner.js",
       "require": "./dist/sonner.cjs"
     },
+    "./styles.css": "./dist/theme.css",
+    "./switch": {
+      "types": "./dist/switch.d.ts",
+      "import": "./dist/switch.js",
+      "require": "./dist/switch.cjs"
+    },
     "./table": {
       "types": "./dist/table.d.ts",
       "import": "./dist/table.js",
@@ -97,6 +118,7 @@
       "import": "./dist/tabs.js",
       "require": "./dist/tabs.cjs"
     },
+    "./tokens.css": "./dist/tokens.css",
     "./tooltip": {
       "types": "./dist/tooltip.d.ts",
       "import": "./dist/tooltip.js",
@@ -106,9 +128,7 @@
       "types": "./dist/utils.d.ts",
       "import": "./dist/utils.js",
       "require": "./dist/utils.cjs"
-    },
-    "./styles.css": "./dist/theme.css",
-    "./tokens.css": "./dist/tokens.css"
+    }
   },
   "sideEffects": [
     "*.css"

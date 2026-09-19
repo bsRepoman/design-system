@@ -19,11 +19,21 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   )
 }
 
+/*
+ * No row separator lines (BS, 2026-09-18): rows are told apart by spacing, and a row that
+ * needs to stand out gets a background, not a rule. The header keeps one rule beneath it and
+ * the footer one above it, both in --border.
+ *
+ * Every border here names its colour. A bare `border-b` takes Tailwind 4's default,
+ * currentColor -- the text colour, so white on dark -- because the `* { border-border }` base
+ * rule lives in this repo's own globals.css and does not ship in styles.css. The rows'
+ * `border-b` was exactly that: high-contrast lines in every consuming app, quiet only here.
+ */
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      className={cn("[&_tr]:border-b [&_tr]:border-border", className)}
       {...props}
     />
   )
@@ -33,7 +43,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
     <tbody
       data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
+      className={cn(className)}
       {...props}
     />
   )
@@ -44,7 +54,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+        "border-t border-border bg-muted/50 font-medium",
         className
       )}
       {...props}
@@ -57,7 +67,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        "transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
         className
       )}
       {...props}

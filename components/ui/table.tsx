@@ -22,7 +22,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 /*
  * No row separator lines (BS, 2026-09-18): rows are told apart by spacing, and a row that
  * needs to stand out gets a background, not a rule. The header keeps one rule beneath it and
- * the footer one above it, both in --border.
+ * the footer one above it, both in --border. The header row is always shaded, never hovered.
  *
  * Every border here names its colour. A bare `border-b` takes Tailwind 4's default,
  * currentColor -- the text colour, so white on dark -- because the `* { border-border }` base
@@ -33,7 +33,12 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b [&_tr]:border-border", className)}
+      className={cn(
+        // The header always carries its background and has no hover state: it is not a row
+        // you act on (BS, 2026-09-18). TableRow's hover fill would otherwise apply here too.
+        "[&_tr]:border-b [&_tr]:border-border [&_tr]:bg-muted/50 [&_tr]:hover:bg-muted/50",
+        className
+      )}
       {...props}
     />
   )

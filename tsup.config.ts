@@ -12,6 +12,7 @@ export default defineConfig({
     index: "components/ui/index.ts",
     ...componentEntries,
     utils: "lib/utils.ts",
+    theme: "lib/theme/index.ts",
   },
   format: ["esm", "cjs"],
   dts: {

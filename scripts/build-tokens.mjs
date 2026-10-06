@@ -8,7 +8,7 @@
 // reset in globals.css are demo-only and deliberately excluded — they're
 // not part of the design system's contract with consumers.
 
-import { mkdirSync, readFileSync, writeFileSync } from "fs"
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "fs"
 
 const SOURCE = "app/globals.css"
 const OUT_DIR = "dist"
@@ -77,4 +77,8 @@ const customVariants = [...source.matchAll(/^@custom-variant .+$/gm)]
 const themeCss = `/* Generated from ${SOURCE} by scripts/build-tokens.mjs. Do not edit directly. */\n\n@import "./tokens.css";\n\n${customVariants}\n\n${themeInlineBlock}\n`
 writeFileSync(`${OUT_DIR}/theme.css`, themeCss)
 
-console.log(`Wrote ${OUT_DIR}/tokens.css and ${OUT_DIR}/theme.css`)
+// The vanilla Appearance controls are plain CSS with no source to extract from, so it
+// ships as written. Consumers with no Tailwind (LegoDB) link it beside tokens.css.
+copyFileSync("lib/theme/appearance.css", `${OUT_DIR}/appearance.css`)
+
+console.log(`Wrote ${OUT_DIR}/tokens.css, ${OUT_DIR}/theme.css and ${OUT_DIR}/appearance.css`)

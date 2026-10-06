@@ -1,6 +1,6 @@
 {
   "name": "@bsrepoman/ui",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "files": [
@@ -12,6 +12,7 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./appearance.css": "./dist/appearance.css",
     "./avatar": {
       "types": "./dist/avatar.d.ts",
       "import": "./dist/avatar.js",
@@ -123,6 +124,13 @@
       "import": "./dist/tabs.js",
       "require": "./dist/tabs.cjs"
     },
+    "./theme": {
+      "types": "./dist/theme.d.ts",
+      "import": "./dist/theme.js",
+      "require": "./dist/theme.cjs"
+    },
+    "./theme-preboot.js": "./dist/theme-preboot.js",
+    "./theme-vanilla.js": "./dist/theme-vanilla.js",
     "./tokens.css": "./dist/tokens.css",
     "./tooltip": {
       "types": "./dist/tooltip.d.ts",
@@ -149,7 +157,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "package:build": "tsup && node scripts/build-tokens.mjs",
+    "package:build": "tsup && tsup --config tsup.vanilla.config.ts && node scripts/build-tokens.mjs",
     "prepare": "npm run package:build"
   },
   "dependencies": {

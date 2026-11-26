@@ -1,6 +1,6 @@
 {
   "name": "@bsrepoman/ui",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": true,
   "type": "module",
   "files": [
@@ -127,6 +127,11 @@
       "types": "./dist/states.d.ts",
       "import": "./dist/states.js",
       "require": "./dist/states.cjs"
+    },
+    "./suggest-input": {
+      "types": "./dist/suggest-input.d.ts",
+      "import": "./dist/suggest-input.js",
+      "require": "./dist/suggest-input.cjs"
     },
     "./styles.css": "./dist/theme.css",
     "./switch": {

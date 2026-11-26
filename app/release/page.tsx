@@ -23,7 +23,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 
 /**
  * The release showcase: Shell, DataTable (with phone rows), StatTile, Combobox, the
- * States (v0.3.0) and Toast (v0.4.0), framed the way the Expense System will use them.
+ * States (v0.3.0), Toast (v0.4.0) and DataTable's defaultGroup (v0.4.1), framed the way the Expense System will use them.
  * Sample data only.
  */
 type Row = { id: number; date: string; month: string; description: string | null; vendor: string;
@@ -117,7 +117,7 @@ function ExpensesPage({ onAdd }: { onAdd: () => void }) {
           <>
             <div className="px-4 pb-3"><Partial>5 waiting for review, not in any totals until accepted.</Partial></div>
             <DataTable rows={ROWS} cols={cols} groupings={groupings} filters={[groupings[1]]}
-                       defaultSort={{ key: "date", dir: "desc" }} rowKey={(r) => r.id} prefsKey="release-demo.expenses"
+                       defaultSort={{ key: "date", dir: "desc" }} defaultGroup="month" rowKey={(r) => r.id} prefsKey="release-demo.expenses"
                        noun="expense" onRowClick={() => onAdd()} />
           </>
         )}

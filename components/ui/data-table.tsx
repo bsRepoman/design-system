@@ -81,7 +81,8 @@ export type Sort = { key: string; dir: "asc" | "desc" }
 
 export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
                                rowKey, prefsKey, noun, onRowClick, rowClassName,
-                               totalRows, controlsOpen, onFiltering, columnsStore }: {
+                               totalRows, controlsOpen, onFiltering, columnsStore,
+                               defaultGroup = "none" }: {
   rows: T[]
   cols: Col<T>[]
   groupings: Grouping<T>[]
@@ -107,6 +108,10 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
   onFiltering?: (on: boolean) => void
   /** Keeps the column order, hidden set and subtotal choices across devices. */
   columnsStore?: DataTableColumnsStore
+  /** The grouping a first visit opens with: a grouping's `key`, or "none" (the default).
+   *  A viewer's saved choice wins over it, so it only shapes the first impression --
+   *  Expenses opens by month, as its mock does. */
+  defaultGroup?: string
 }) {
   type Columns = DataTableColumns
   const isPhone = useIsPhone()
@@ -116,8 +121,8 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
   const defaultOrder = React.useMemo(() => cols.map((c) => c.key), [cols])
   const defaults: Prefs = React.useMemo(
     () => ({ hidden: defaultHidden, order: defaultOrder, nosub: [],
-             group: "none", pick: {}, sort: defaultSort }),
-    [defaultHidden, defaultOrder, defaultSort])
+             group: defaultGroup, pick: {}, sort: defaultSort }),
+    [defaultHidden, defaultOrder, defaultSort, defaultGroup])
 
   // Saved preferences load before first paint, not during render: a server render (Next)
   // cannot see this browser's storage, and reading it in render made the server's HTML and

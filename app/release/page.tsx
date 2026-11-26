@@ -18,11 +18,13 @@ import { Shell, useShellPhone } from "@/components/ui/shell"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StatTile } from "@/components/ui/stat-tile"
 import { Empty, Failed, Partial } from "@/components/ui/states"
+import { toast } from "@/components/ui/toast"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 /**
- * The v0.3.0 showcase: Shell, DataTable (with phone rows), StatTile, Combobox and the
- * States, framed the way the Expense System will use them. Sample data only.
+ * The release showcase: Shell, DataTable (with phone rows), StatTile, Combobox, the
+ * States (v0.3.0) and Toast (v0.4.0), framed the way the Expense System will use them.
+ * Sample data only.
  */
 type Row = { id: number; date: string; month: string; description: string | null; vendor: string;
              category: string; sub: string; amount: number }
@@ -100,6 +102,13 @@ function ExpensesPage({ onAdd }: { onAdd: () => void }) {
             <Button key={s} size="xs" variant={state === s ? "default" : "outline"} onClick={() => setState(s)}>{s}</Button>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-1.5 px-4 pb-3">
+          <span className="text-xs text-muted-foreground">Toasts:</span>
+          <Button size="xs" variant="outline" onClick={() => toast.success("Saved “Furnace filters”")}>Saved</Button>
+          <Button size="xs" variant="outline" onClick={() => toast.success("Deleted “Mulch”", { undo: () => toast.info("Restored “Mulch”") })}>Delete, with Undo</Button>
+          <Button size="xs" variant="outline" onClick={() => toast.error("Couldn't save. The server didn't answer.")}>Error</Button>
+          <Button size="xs" variant="outline" onClick={() => ["Electric", "Mulch", "Flight to PIT", "Snow plowing 11/12"].forEach((d) => toast.success(`Accepted “${d}”`))}>Four at once</Button>
+        </div>
         {state === "loading" && <div className="flex flex-col gap-2 p-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-9" />)}</div>}
         {state === "empty" && <Empty title="No expenses in 2026 yet" detail="Add a receipt, or pick another year."
                                      action={{ label: "Add receipt", onClick: onAdd }} />}
@@ -144,8 +153,8 @@ function AddDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: bo
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Save for later</Button>
-          <Button onClick={() => onOpenChange(false)}>Save</Button>
+          <Button variant="outline" onClick={() => { onOpenChange(false); toast.info("Saved for review") }}>Save for later</Button>
+          <Button onClick={() => { onOpenChange(false); toast.success(`Saved “${desc ?? vendor ?? "expense"}”`) }}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -33,7 +33,6 @@ export default defineConfig({
     "clsx",
     "tailwind-merge",
     "next-themes",
-    "sonner",
     "cmdk",
   ],
   banner: {

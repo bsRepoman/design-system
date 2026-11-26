@@ -34,6 +34,7 @@ export default defineConfig({
     "tailwind-merge",
     "next-themes",
     "sonner",
+    "cmdk",
   ],
   banner: {
     js: '"use client"',

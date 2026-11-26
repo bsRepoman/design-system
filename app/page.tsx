@@ -206,6 +206,11 @@ export default function Home() {
           <span className="text-sm font-medium">Dashboard</span>
 
           <div className="ml-auto flex items-center gap-2">
+            {/* Shell needs a page of its own, so the v0.3.0 components are shown there. */}
+            <a href="/release"
+               className="inline-flex h-8 items-center rounded-md border border-input px-3 text-sm font-medium hover:bg-accent">
+              v0.3.0: Shell, DataTable, StatTile, Combobox
+            </a>
             <Button variant="ghost" size="icon">
               <BellIcon className="size-4" />
               <span className="sr-only">Notifications</span>

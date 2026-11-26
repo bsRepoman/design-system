@@ -37,6 +37,8 @@
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-border-strong: var(--border-strong);
+  --color-positive: var(--positive);
+  --color-info: var(--info);
   --color-link: var(--link);
   --color-link-hover: var(--link-hover);
   --color-link-active: var(--link-active);
@@ -85,6 +87,15 @@
      anything that is the sole boundary of an interactive element uses this,
      which clears 3:1 on both grounds (light 3.64:1, dark 5.44:1). */
   --border-strong: oklch(0.62 0 0);
+  /* Two status colours, fixed: they carry meaning, so they never move with the accent.
+     Promoted from PBJ Chalet 2026-11-25 (values and contrast measured there):
+     --positive, a change in the viewer's favour (StatTile's "better"): 5.62:1 on white,
+     8.33:1 on the dark card; it shares hue 150 with the green accent, a known overlap
+     kept by BS's choice 2026-09-18. --info, messages and "in review": the fixed link blue
+     at hue 258, never --link, which follows the accent: 6.12:1 on white, 7.07:1 on the
+     dark card. */
+  --positive: oklch(0.50 0.14 150);
+  --info: oklch(0.50 0.16 258);
   /* THE LINK FALLBACK. A link colour is SEMANTIC, so it never derives from
      --primary: --primary in this base theme is a near-black neutral and neutral
      is the DEFAULT accent, so a --primary-derived link would ship looking
@@ -136,6 +147,8 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --border-strong: oklch(0.62 0 0);
+  --positive: oklch(0.74 0.17 150);
+  --info: oklch(0.72 0.16 258);
   /* THE LINK FALLBACK -- see :root for why it is not --primary-derived. Each
      named accent below overrides it; a neutral accent falls back to this, and
      hue 258 is the blue accent's own hue so blue needs no override.

@@ -72,26 +72,35 @@ const toast = {
   close: (id?: string) => manager.close(id),
 }
 
+/** Each kind tints the surface with its own colour (UX Designer Decisions (69)): a light mix
+ *  into the popover, a matching ring, the text unchanged, so it reads in both themes. */
+const TINTS: Record<ToastKind, string> = {
+  success: "bg-[color-mix(in_oklab,var(--positive)_14%,var(--popover))] ring-positive/40",
+  error: "bg-[color-mix(in_oklab,var(--destructive)_14%,var(--popover))] ring-destructive/40",
+  info: "bg-[color-mix(in_oklab,var(--info)_14%,var(--popover))] ring-info/40",
+}
+
 const ICONS: Record<ToastKind, React.ReactNode> = {
   success: <CircleCheckIcon className="size-4 text-positive" />,
   error: <OctagonXIcon className="size-4 text-destructive" />,
   info: <InfoIcon className="size-4 text-info" />,
 }
 
-function ToastList({ isPhone }: { isPhone: boolean }) {
+function ToastList() {
   const { toasts } = ToastPrimitive.useToastManager()
   return toasts.map((t) => (
     <ToastPrimitive.Root
       key={t.id}
       toast={t}
-      swipeDirection={isPhone ? "down" : ["right", "down"]}
+      swipeDirection="down"
       data-slot="toast"
       className={cn(
         // Each toast sits at the bottom of the viewport and is lifted by the heights of
         // the newer toasts below it (`--toast-offset-y`) plus a gap per position.
         "absolute right-0 bottom-0 left-0 z-[calc(1000-var(--toast-index))] select-none",
-        "flex items-start gap-2.5 rounded-xl bg-popover p-3 pr-2 text-popover-foreground",
-        "shadow-lg ring-1 ring-foreground/10 outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "flex items-start gap-2.5 rounded-xl p-3 pr-2 text-popover-foreground",
+        "shadow-lg ring-1 outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        TINTS[(t.type as ToastKind) ?? "info"] ?? TINTS.info,
         "[transform:translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)-var(--toast-offset-y)-var(--toast-index)*0.5rem))]",
         "transition-[transform,opacity] duration-200 ease-out",
         "data-[starting-style]:opacity-0 data-[starting-style]:[transform:translateY(100%)]",
@@ -124,8 +133,9 @@ function ToastList({ isPhone }: { isPhone: boolean }) {
 }
 
 /**
- * Renders the toasts. Desktop: bottom-right. Phone: along the bottom, above `Shell`'s
- * floating primary action (bottom-6 + h-13), so it never covers it; swipe down to dismiss.
+ * Renders the toasts. Desktop: bottom centre (UX Designer Decisions (69)). Phone: along the
+ * bottom, above `Shell`'s floating primary action (bottom-6 + h-13), so it never covers it.
+ * Swipe down to dismiss.
  * F6 moves focus to the toasts (base-ui).
  */
 function ToastProvider({ children }: { children?: React.ReactNode }) {
@@ -140,10 +150,10 @@ function ToastProvider({ children }: { children?: React.ReactNode }) {
             "fixed z-50 outline-none",
             isPhone
               ? "right-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] left-3"
-              : "right-6 bottom-6 w-90"
+              : "bottom-6 left-1/2 w-90 -translate-x-1/2"
           )}
         >
-          <ToastList isPhone={isPhone} />
+          <ToastList />
         </ToastPrimitive.Viewport>
       </ToastPrimitive.Portal>
     </ToastPrimitive.Provider>

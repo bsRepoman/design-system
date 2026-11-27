@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  CameraIcon, ChartColumnIcon, ChevronDownIcon, ListIcon, ReceiptIcon, RepeatIcon,
+  CameraIcon, ChartColumnIcon, ChevronDownIcon, ListIcon, PencilIcon, ReceiptIcon, RepeatIcon, Trash2Icon,
   SettingsIcon, SettingsIcon as GearIcon, TagsIcon, UploadIcon,
 } from "lucide-react"
 
@@ -25,7 +25,8 @@ import { ThemeToggle } from "@/components/theme-toggle"
  * The release showcase: Shell, DataTable (with phone rows), StatTile, Combobox, the
  * States (v0.3.0), Toast (v0.4.0), DataTable's defaultGroup (v0.4.1), and saved views (v0.5.0:
  * Shell nav children with a hover bin; DataTable's controlled `view`, two-row `panel` and
- * `onShownChange`), framed the way the Expense System will use them.
+ * `onShownChange`), and v0.5.1 (a group label spanning to the first subtotal; Shell's
+ * `phoneTitle` and `phoneFooter`), framed the way the Expense System will use them.
  * Sample data only.
  */
 type Row = { id: number; date: string; month: string; description: string | null; vendor: string;
@@ -40,6 +41,8 @@ const ROWS: Row[] = [
   [6, "2026-10-27", "Mulch", "Lowe's", "Supplies", "General", 61.12],
   [7, "2026-10-21", "Mulch", "Lowe's", "Supplies", "General", -18.4],
   [8, "2026-10-04", null, "Bed Bath & Beyond", "Supplies", "Bedding", 92.55],
+  // A long group label: grouped by category it must not widen the first column (v0.5.1).
+  [9, "2026-09-30", "Short-term rental permit", "Tobyhanna Township", "Taxes, permits & fees", "Permits & fees", 150],
 ].map(([id, date, description, vendor, category, sub, amount]) => ({
   id: id as number, date: date as string, description: description as string | null, vendor: vendor as string,
   category: category as string, sub: sub as string, amount: amount as number,
@@ -234,6 +237,19 @@ export default function ReleaseShowcase() {
       headerRight={<><Button variant="outline" size="sm" onClick={() => setLong((l) => !l)}>{long ? "Short title" : "Long title (55)"}</Button><ThemeToggle /></>}
       headerAction={active === "spending" ? { label: "Upload statement", icon: UploadIcon, onClick: () => {} } : undefined}
       primaryAction={{ label: "Add receipt", icon: CameraIcon, onClick: () => setAdding(true) }}
+      // v0.5.1: a saved view names the phone header itself, and pins its actions to the bottom.
+      phoneTitle={active === "view:supplies"
+        ? <button type="button" className="flex min-w-0 items-center gap-1.5 text-[22px] leading-none font-semibold tracking-tight">
+            <span className="truncate">Supplies by category</span><PencilIcon className="size-4 shrink-0 text-muted-foreground" />
+          </button>
+        : undefined}
+      phoneFooter={active === "view:supplies" ? <>
+        <span className="flex-1" />
+        <Button variant="ghost" size="icon-sm" aria-label="Delete view" className="text-destructive"><Trash2Icon /></Button>
+        <Button variant="ghost" size="sm">Revert</Button>
+        <Button variant="outline" size="sm">Save as new</Button>
+        <Button size="sm" disabled>Save</Button>
+      </> : undefined}
     >
       {active === "expenses" || active.startsWith("view:")
         ? <ExpensesPage onAdd={() => setAdding(true)} viewKey={active.startsWith("view:") ? active : "view:default"} />

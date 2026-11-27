@@ -64,6 +64,14 @@ type ShellProps = {
   /** Opt-in, for the app's one primary task only, one per page: in the top bar on a
    *  desktop, floating bottom right on a phone (48). */
   primaryAction?: ShellAction
+  /** Phone only: shown in the header in place of `title`, for a page whose title is itself a
+   *  control (a saved view renamed in place, UX Designer Decisions (71)). Keep it one line at
+   *  the header's 22px; `title` still names the page everywhere else. */
+  phoneTitle?: React.ReactNode
+  /** Phone only: a bar pinned to the bottom of the screen for the page's own actions (a saved
+   *  view's bin, Revert and Save, (71)). The floating primary action sits above it and the
+   *  content leaves room for both, so neither covers the other or the last row. */
+  phoneFooter?: React.ReactNode
   children: React.ReactNode
 }
 
@@ -213,7 +221,7 @@ function DesktopFrame(props: ShellProps) {
 /* ---------------------------------------------------------------------------------- */
 
 function PhoneFrame(props: ShellProps) {
-  const { title, period, headerRight, headerAction, primaryAction, children } = props
+  const { title, phoneTitle, period, headerRight, headerAction, primaryAction, phoneFooter, children } = props
   const [navOpen, setNavOpen] = React.useState(false)
   const header = React.useRef<HTMLElement>(null)
   const periodBox = React.useRef<HTMLSpanElement>(null)
@@ -241,7 +249,7 @@ function PhoneFrame(props: ShellProps) {
     const ro = new ResizeObserver(check)
     ro.observe(h)
     return () => ro.disconnect()
-  }, [period, periodDrops, title, headerAction])
+  }, [period, periodDrops, title, phoneTitle, headerAction])
 
   const firstLine = (periodDrops && period) || headerRight
   return (
@@ -254,7 +262,9 @@ function PhoneFrame(props: ShellProps) {
                   onClick={() => setNavOpen(true)} className="size-11 shrink-0 [&_svg:not([class*='size-'])]:size-[22px]">
             <MenuIcon />
           </Button>
-          <h1 className="ml-0.5 shrink-0 text-[22px] leading-none font-semibold tracking-tight whitespace-nowrap">{title}</h1>
+          {phoneTitle
+            ? <div className="ml-0.5 flex min-w-0 shrink items-center">{phoneTitle}</div>
+            : <h1 className="ml-0.5 shrink-0 text-[22px] leading-none font-semibold tracking-tight whitespace-nowrap">{title}</h1>}
           {period && !periodDrops && <span ref={periodBox} className="ml-1.5 shrink-0">{period}</span>}
           <span ref={spacer} className="min-w-0 flex-1" />
           {headerAction && (
@@ -271,13 +281,24 @@ function PhoneFrame(props: ShellProps) {
             {headerRight}
           </div>
         )}
-        {/* Room under the content for the floating action, so it never covers the last row. */}
-        <div className={cn("min-w-0 flex-1 p-3", primaryAction && "pb-24")}>{children}</div>
+        {/* Room under the content for the floating action and the page footer, so neither
+            covers the last row. */}
+        <div className={cn("min-w-0 flex-1 p-3", primaryAction && "pb-24", phoneFooter && (primaryAction ? "pb-40" : "pb-20"))}>
+          {children}
+        </div>
       </SidebarInset>
 
+      {phoneFooter && (
+        <div data-slot="shell-phone-footer"
+             className="fixed inset-x-0 bottom-0 z-20 flex items-center gap-2 border-t border-border bg-card px-3 pt-2.5
+                        pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          {phoneFooter}
+        </div>
+      )}
       {primaryAction && (
         <Button onClick={primaryAction.onClick}
-                className="fixed right-4 bottom-6 z-30 h-13 rounded-full px-5 text-[15px] shadow-lg [&_svg:not([class*='size-'])]:size-5">
+                className={cn("fixed right-4 z-30 h-13 rounded-full px-5 text-[15px] shadow-lg [&_svg:not([class*='size-'])]:size-5",
+                              phoneFooter ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))]" : "bottom-6")}>
           <primaryAction.icon />{primaryAction.label}
         </Button>
       )}

@@ -645,18 +645,28 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
                 // figure, right-aligned like the Total row. Each column's subtotal can be turned
                 // off from the Columns menu. No count: the label and figures say enough.
                 <TableRow className="hover:bg-transparent">
-                  {shown.map((c, ci) => (
-                    <TableCell key={c.key}
-                               // The row type size, a solid fill and a rule both sides, and the
-                               // only weight in the body: the rows are regular (BS, 2026-11-22).
-                               className={`border-y border-border bg-muted py-2.5 font-semibold
-                                           tabular-nums whitespace-nowrap
-                                           ${c.align === "right" ? "text-right" : ""}`}>
-                      {ci === 0 ? <span className="tracking-wider uppercase">{g.label}</span>
-                        : c.total && subOn(c.key)
-                        ? c.total(totalRows ? totalRows(g.rows) : g.rows) : null}
-                    </TableCell>
-                  ))}
+                  {(() => {
+                    // The label spans every column up to the first one showing a subtotal, so a
+                    // long label ("TAXES, PERMITS & FEES", a vendor) uses the empty cells beside it
+                    // instead of widening the first column; it widened a grouped table past its
+                    // card (found on the Expense System's saved views, 2026-11-27).
+                    const firstFigure = shown.findIndex((c, ci) => ci > 0 && c.total && subOn(c.key))
+                    const span = firstFigure === -1 ? shown.length : firstFigure
+                    // The row type size, a solid fill and a rule both sides, and the only weight
+                    // in the body: the rows are regular (BS, 2026-11-22).
+                    const cell = "border-y border-border bg-muted py-2.5 font-semibold tabular-nums"
+                    return [
+                      <TableCell key="label" colSpan={span} className={cell}>
+                        <span className="tracking-wider uppercase">{g.label}</span>
+                      </TableCell>,
+                      ...shown.slice(span).map((c) => (
+                        <TableCell key={c.key}
+                                   className={`${cell} whitespace-nowrap ${c.align === "right" ? "text-right" : ""}`}>
+                          {c.total && subOn(c.key) ? c.total(totalRows ? totalRows(g.rows) : g.rows) : null}
+                        </TableCell>
+                      )),
+                    ]
+                  })()}
                 </TableRow>
               )}
               {g.rows.map((r) => (

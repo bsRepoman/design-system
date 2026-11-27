@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BellIcon, MenuIcon, XIcon } from "lucide-react"
+import { BellIcon, MenuIcon, Trash2Icon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -9,7 +9,8 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
   SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuBadge, SidebarMenuButton,
-  SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger, useSidebar,
+  SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem,
+  SidebarProvider, SidebarRail, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar"
 import { useIsPhone } from "@/hooks/use-phone"
 import { cn } from "@/lib/utils"
@@ -34,7 +35,14 @@ type ShellNavItem = {
   /** A surface that exists in the plan and not yet in the app: shown, marked, inert.
    *  Hiding it would make the app look finished when it is not. */
   soon?: boolean
+  /** Entries nested under this one, such as a page's saved views (UX Designer Decisions
+   *  (71)). Each is its own `key` for `active` and `onNavigate`. */
+  children?: ShellNavChild[]
 }
+
+/** A nested nav entry. `onDelete` adds a bin that appears on hover, on a desktop only: a
+ *  phone has no hover, so a page offers delete in its own footer there. */
+type ShellNavChild = { key: string; label: string; onDelete?: () => void }
 
 type ShellAction = { label: string; icon: React.ElementType; onClick: () => void }
 
@@ -81,13 +89,14 @@ function Shell(props: ShellProps) {
 
 /** Separate from the frame because useSidebar() only resolves below SidebarProvider. */
 function DesktopNav({ brand, nav, footer = [], active, onNavigate }: ShellProps) {
-  const { setOpenMobile } = useSidebar()
+  const { setOpenMobile, open } = useSidebar()
   const go = (k: string) => { setOpenMobile(false); onNavigate(k) }
   const item = (i: ShellNavItem) => (
     <SidebarMenuItem key={i.key}>
       {/* aria-disabled, not disabled: SidebarMenuButton renders through useRender and drops
           a `disabled` prop, while its own styles key off aria-disabled. */}
-      <SidebarMenuButton isActive={i.key === active} tooltip={i.label}
+      <SidebarMenuButton isActive={i.key === active || (!!i.children?.some((c) => c.key === active) && !open)}
+                         tooltip={i.label}
                          aria-disabled={i.soon || undefined}
                          onClick={i.soon ? undefined : () => go(i.key)}>
         <i.icon />
@@ -95,6 +104,29 @@ function DesktopNav({ brand, nav, footer = [], active, onNavigate }: ShellProps)
       </SidebarMenuButton>
       {i.soon && (
         <SidebarMenuBadge className="text-[10px] tracking-wide text-muted-foreground uppercase">soon</SidebarMenuBadge>
+      )}
+      {i.children && i.children.length > 0 && (
+        <SidebarMenuSub>
+          {i.children.map((c) => (
+            <SidebarMenuSubItem key={c.key}>
+              <SidebarMenuSubButton render={<button type="button" />} isActive={c.key === active}
+                                    aria-current={c.key === active ? "page" : undefined}
+                                    onClick={() => go(c.key)}
+                                    className={cn("w-full text-left", c.onDelete && "pr-7")}>
+                <span>{c.label}</span>
+              </SidebarMenuSubButton>
+              {c.onDelete && (
+                <button type="button" aria-label={`Delete ${c.label}`} onClick={c.onDelete}
+                        className="absolute top-1/2 right-1 flex size-5 -translate-y-1/2 items-center justify-center rounded-md
+                                   text-muted-foreground opacity-0 outline-hidden hover:text-destructive
+                                   focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-sidebar-ring
+                                   group-hover/menu-sub-item:opacity-100 group-focus-within/menu-sub-item:opacity-100">
+                  <Trash2Icon className="size-3.5" />
+                </button>
+              )}
+            </SidebarMenuSubItem>
+          ))}
+        </SidebarMenuSub>
       )}
     </SidebarMenuItem>
   )
@@ -272,6 +304,20 @@ function PhoneNav({ brand, nav, footer = [], active, onNavigate, open, onOpenCha
         <span className="flex-1">{i.label}</span>
         {i.soon && <span className="text-[11px] tracking-wider text-muted-foreground uppercase">soon</span>}
       </button>
+      {i.children && i.children.length > 0 && (
+        <ul className="flex flex-col gap-0.5 pt-0.5">
+          {i.children.map((c) => (
+            <li key={c.key}>
+              <button type="button" aria-current={c.key === active ? "page" : undefined} onClick={() => go(c.key)}
+                      className={cn("flex h-11 w-full items-center rounded-lg pr-3.5 pl-[3.25rem] text-left text-base",
+                                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                    c.key === active ? "bg-sidebar-accent font-semibold" : "text-muted-foreground hover:bg-sidebar-accent/60")}>
+                <span className="truncate">{c.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </li>
   )
   return (
@@ -304,4 +350,4 @@ function PhoneNav({ brand, nav, footer = [], active, onNavigate, open, onOpenCha
 }
 
 export { Shell, useShellPhone, useIsPhone }
-export type { ShellProps, ShellNavItem, ShellAction }
+export type { ShellProps, ShellNavItem, ShellNavChild, ShellAction }

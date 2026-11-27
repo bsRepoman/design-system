@@ -79,10 +79,19 @@ export type Grouping<T> = {
 
 export type Sort = { key: string; dir: "asc" | "desc" }
 
+/** Everything a saved view keeps of the table (UX Designer Decisions (71)): grouping, the
+ *  ticked filter values, sort, and the columns. Left out, `columns` means the defaults. */
+export type DataTableView = {
+  group: string
+  pick: Record<string, string[]>
+  sort: Sort
+  columns?: Partial<DataTableColumns>
+}
+
 export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
                                rowKey, prefsKey, noun, onRowClick, rowClassName,
                                totalRows, controlsOpen, onFiltering, columnsStore,
-                               defaultGroup = "none" }: {
+                               defaultGroup = "none", view, onViewChange, panel, onShownChange }: {
   rows: T[]
   cols: Col<T>[]
   groupings: Grouping<T>[]
@@ -112,6 +121,17 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
    *  A viewer's saved choice wins over it, so it only shapes the first impression --
    *  Expenses opens by month, as its mock does. */
   defaultGroup?: string
+  /** Given, the page owns the table's state (a saved view): the table starts from it, reports
+   *  every change through `onViewChange`, and stores nothing itself, neither in this browser
+   *  nor through `columnsStore`. */
+  view?: DataTableView
+  onViewChange?: (view: DataTableView) => void
+  /** Two-row controls panel (Expenses, UX Designer Decisions (71)): `start` leads the Filter
+   *  row, before the table's own filters (the page's year and entity); `end` closes the Group
+   *  by row, after Columns (the view's actions). The plain count is left to the page. */
+  panel?: { start?: React.ReactNode; end?: React.ReactNode }
+  /** Told which rows survive the filters, so a page's headline can total what the table shows. */
+  onShownChange?: (rows: T[]) => void
 }) {
   type Columns = DataTableColumns
   const isPhone = useIsPhone()
@@ -127,8 +147,16 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
   // Saved preferences load before first paint, not during render: a server render (Next)
   // cannot see this browser's storage, and reading it in render made the server's HTML and
   // the client's disagree (hydration mismatch, measured in the showcase 2026-11-25).
-  const [prefs, setPrefs] = React.useState<Prefs>(defaults)
+  const [own, setPrefs] = React.useState<Prefs>(defaults)
+  const controlled = view !== undefined
+  const prefs: Prefs = React.useMemo(() => !view ? own : {
+    order: view.columns?.order ?? defaults.order,
+    hidden: view.columns?.hidden ?? defaults.hidden,
+    nosub: view.columns?.nosub ?? defaults.nosub,
+    group: view.group, pick: view.pick ?? {}, sort: view.sort ?? defaultSort,
+  }, [view, own, defaults, defaultSort])
   useIsomorphicLayoutEffect(() => {
+    if (controlled) return
     setPrefs((() => {
       const p = loadPref(prefsKey, defaults)
       // A filter used to hold one value. A browser that stored a string would make
@@ -144,8 +172,15 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
   const filtering = Object.values(prefs.pick).some((v) => v.length > 0)
   React.useEffect(() => { onFiltering?.(filtering) }, [filtering, onFiltering])
 
-  const update = (p: Partial<Prefs>) =>
+  const update = (p: Partial<Prefs>) => {
+    if (controlled) {
+      const n = { ...prefs, ...p }
+      onViewChange?.({ group: n.group, pick: n.pick, sort: n.sort,
+                       columns: { order: n.order, hidden: n.hidden, nosub: n.nosub } })
+      return
+    }
     setPrefs((s) => { const next = { ...s, ...p }; savePref(prefsKey, next); return next })
+  }
 
   // Which columns show, and in what order, can follow the viewer across devices (UX Designer
   // Decisions 43): saved through `columnsStore`. Grouping, filters and
@@ -165,11 +200,11 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
 
   const saveColumns = (c: Columns) => {
     update(c)
-    if (columnsStore) Promise.resolve().then(() => columnsStore.save(c)).catch(() => {})
+    if (columnsStore && !controlled) Promise.resolve().then(() => columnsStore.save(c)).catch(() => {})
   }
 
   React.useEffect(() => {
-    if (!columnsStore) return
+    if (!columnsStore || controlled) return
     let live = true
     columnsStore.load()
       .then((v) => {
@@ -187,7 +222,7 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
       })
       .catch(() => {})
     return () => { live = false }
-  }, [columnsStore, reconcile])
+  }, [columnsStore, reconcile, controlled])
 
   // The pinned column leads whatever the saved order says: a row identifying nothing is
   // meaningless, and so is one whose identity sits in the middle.
@@ -241,6 +276,16 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
       const want = prefs.pick[f.key]
       return !want?.length || want.includes(f.of(r))
     })), [rows, filters, prefs.pick])
+  // Reported only when the surviving rows actually differ: `kept` is rebuilt whenever a page
+  // passes a fresh `filters` array, and a page that stores what it is told would otherwise
+  // re-render, rebuild, and be told again, without end (measured in the showcase).
+  const reported = React.useRef<T[] | null>(null)
+  React.useEffect(() => {
+    const last = reported.current
+    if (last && last.length === kept.length && last.every((r, i) => r === kept[i])) return
+    reported.current = kept
+    onShownChange?.(kept)
+  }, [kept, onShownChange])
 
   const sortCol = cols.find((c) => c.key === prefs.sort.key && c.sort)
   const sorted = React.useMemo(() => {
@@ -290,6 +335,133 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
       <div className={controlsOpen === undefined
         ? "sticky top-[var(--shell-header,3.5rem)] z-10 flex flex-wrap items-center gap-2 border-b border-border bg-card px-4 py-2.5"
         : "mx-4 mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-muted/60 p-3.5"}>
+        {panel ? (
+          <>
+            {/* Filter row: the page's own filters (year, entity) first, then the table's. */}
+            <div className="flex w-full flex-wrap items-center gap-2">
+              <span className="w-16 shrink-0 text-xs text-muted-foreground max-[479px]:hidden">Filter</span>
+              {panel.start}
+              {panel.start && filters.length > 0 && <span className="mx-0.5 h-4 w-px bg-border max-[479px]:hidden" />}
+        {filters.map((f) => {
+          const on = prefs.pick[f.key] ?? []
+          const set = (vals: string[]) => update({ pick: { ...prefs.pick, [f.key]: vals } })
+          return (
+            <Dropdown key={f.key} align="left" label={
+              <>
+                {f.label}
+                {on.length > 0 && (
+                  <span className="ml-1 rounded bg-primary/15 px-1 font-medium text-primary">
+                    {on.length}
+                  </span>
+                )}
+              </>
+            }>
+              <div className="flex items-center justify-between px-2 py-1">
+                <span className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                  {f.label}
+                </span>
+                <Button variant="ghost" size="xs" disabled={on.length === 0}
+                        onClick={() => set([])}
+                        className="-mr-1 h-5 px-1.5 text-[11px] font-normal
+                                   text-muted-foreground">
+                  Clear
+                </Button>
+              </div>
+              {options[f.key]?.map((v) => (
+                <Tick key={v} checked={on.includes(v)} label={v} capitalize
+                      onChange={() =>
+                        set(on.includes(v) ? on.filter((x) => x !== v) : [...on, v])} />
+              ))}
+            </Dropdown>
+          )
+        })}
+
+            </div>
+            <div className="flex w-full flex-wrap items-center gap-2">
+              <span className="w-16 shrink-0 text-xs text-muted-foreground max-[479px]:hidden">Group by</span>
+        {/* Scrolls sideways inside the panel rather than past it: Income's five choices
+            are wider than a phone's panel. */}
+        <div className="max-w-full overflow-x-auto">
+          <SegmentedControl value={prefs.group} onValueChange={(g) => update({ group: g })}>
+            {[{ key: "none", label: "None" }, ...groupings].map((g) => (
+              <SegmentedControlItem key={g.key} value={g.key}>{g.label}</SegmentedControlItem>
+            ))}
+          </SegmentedControl>
+        </div>
+
+        {/* Show, hide and reorder in one list, in the table's own order. Drag the grip with
+            a pointer; the arrows are for a finger (Safari on a phone has no drag) and the
+            keyboard. The pinned column stays first and fixed. */}
+        <Dropdown align="right" label={<><Columns3Icon />Columns</>} wide>
+          {ordered.map((c) => {
+            const i = movable.findIndex((m) => m.key === c.key)
+            return (
+              <div key={c.key}
+                   draggable={!c.pinned}
+                   onDragStart={(e) => { setDragged(c.key); e.dataTransfer.effectAllowed = "move" }}
+                   onDragOver={(e) => { if (dragged && !c.pinned) { e.preventDefault(); setOver(c.key) } }}
+                   onDragLeave={() => setOver((o) => (o === c.key ? null : o))}
+                   onDrop={(e) => {
+                     e.preventDefault()
+                     if (dragged && dragged !== c.key) moveCol(dragged, c.key)
+                     setDragged(null); setOver(null)
+                   }}
+                   onDragEnd={() => { setDragged(null); setOver(null) }}
+                   className={`flex items-center rounded-md
+                               ${dragged === c.key ? "opacity-40" : ""}
+                               ${over === c.key && dragged !== c.key ? "bg-accent ring-1 ring-primary/60" : ""}`}>
+                <span className={`flex w-5 shrink-0 justify-center text-muted-foreground
+                                  ${c.pinned ? "opacity-0" : "cursor-grab active:cursor-grabbing"}`}
+                      aria-hidden>
+                  <GripVerticalIcon className="size-3.5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <Tick label={c.label} disabled={c.pinned}
+                        checked={c.pinned || !prefs.hidden.includes(c.key)}
+                        onChange={() => toggleCol(c.key)}
+                        note={c.pinned ? "pinned" : undefined} />
+                </div>
+                {!c.pinned && (
+                  <span className="flex shrink-0">
+                    {/* Σ: this column's subtotal in the group rows. Only columns that total
+                        have one; the rest keep the space so the arrows line up. */}
+                    {c.total ? (
+                      <Button variant="ghost" size="icon-xs" aria-pressed={subOn(c.key)}
+                              aria-label={`${c.label} subtotal in groups`}
+                              title={subOn(c.key) ? "Subtotal shown in groups" : "Subtotal hidden in groups"}
+                              onClick={() => toggleSub(c.key)}
+                              className={`size-7 max-sm:size-11 ${subOn(c.key) ? "text-primary" : "text-muted-foreground/50"}`}>
+                        <SigmaIcon />
+                      </Button>
+                    ) : <span className="size-7 max-sm:size-11" />}
+                    <Button variant="ghost" size="icon-xs" aria-label={`Move ${c.label} up`}
+                            disabled={i === 0} onClick={() => step(c.key, -1)}
+                            className="size-7 max-sm:size-11">
+                      <ChevronUpIcon />
+                    </Button>
+                    <Button variant="ghost" size="icon-xs" aria-label={`Move ${c.label} down`}
+                            disabled={i === movable.length - 1} onClick={() => step(c.key, 1)}
+                            className="size-7 max-sm:size-11">
+                      <ChevronDownIcon />
+                    </Button>
+                  </span>
+                )}
+              </div>
+            )
+          })}
+          <div className="mt-1 flex justify-end border-t border-border px-1 pt-1.5">
+            <Button variant="ghost" size="xs" disabled={!customised}
+                    onClick={() => saveColumns({ order: defaultOrder, hidden: defaultHidden, nosub: [] })}
+                    className="text-[12px] font-normal text-muted-foreground">
+              Reset
+            </Button>
+          </div>
+        </Dropdown>
+              {panel.end && <div className="ml-auto flex flex-wrap items-center gap-2">{panel.end}</div>}
+            </div>
+          </>
+        ) : (
+          <>
         <span className="text-xs text-muted-foreground">Group by</span>
         {/* Scrolls sideways inside the panel rather than past it: Income's five choices
             are wider than a phone's panel. */}
@@ -422,6 +594,8 @@ export function DataTable<T>({ rows, cols, groupings, filters = [], defaultSort,
             </Button>
           </div>
         </Dropdown>
+          </>
+        )}
       </div>
       )}
 

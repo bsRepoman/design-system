@@ -3,13 +3,13 @@
 import * as React from "react"
 import {
   CameraIcon, ChartColumnIcon, ChevronDownIcon, ListIcon, ReceiptIcon, RepeatIcon,
-  SettingsIcon, TagsIcon, UploadIcon,
+  SettingsIcon, SettingsIcon as GearIcon, TagsIcon, UploadIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
-import { type Col, DataTable, type Grouping } from "@/components/ui/data-table"
+import { type Col, DataTable, type DataTableView, type Grouping } from "@/components/ui/data-table"
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
@@ -23,7 +23,9 @@ import { ThemeToggle } from "@/components/theme-toggle"
 
 /**
  * The release showcase: Shell, DataTable (with phone rows), StatTile, Combobox, the
- * States (v0.3.0), Toast (v0.4.0) and DataTable's defaultGroup (v0.4.1), framed the way the Expense System will use them.
+ * States (v0.3.0), Toast (v0.4.0), DataTable's defaultGroup (v0.4.1), and saved views (v0.5.0:
+ * Shell nav children with a hover bin; DataTable's controlled `view`, two-row `panel` and
+ * `onShownChange`), framed the way the Expense System will use them.
  * Sample data only.
  */
 type Row = { id: number; date: string; month: string; description: string | null; vendor: string;
@@ -60,7 +62,51 @@ const DESCRIPTIONS: ComboboxOption[] = [
   { value: "Air filter, upstairs", label: "Air filter, upstairs", hint: "Repairs" },
 ]
 
-function ExpensesPage({ onAdd }: { onAdd: () => void }) {
+const VIEWS: Record<string, { name: string; view: DataTableView }> = {
+  "view:default": { name: "Default view", view: { group: "month", pick: {}, sort: { key: "date", dir: "desc" } } },
+  "view:supplies": { name: "Supplies by category", view: { group: "category", pick: { category: ["Supplies"] },
+                     sort: { key: "amount", dir: "desc" }, columns: { hidden: ["vendor"] } } },
+}
+
+/** v0.5.0: a saved view drives the table; the panel carries the page's own filter and the
+ *  view's actions; the headline totals what the filters leave. */
+function SavedViewDemo({ viewKey, cols, groupings }: { viewKey: string; cols: Col<Row>[]; groupings: Grouping<Row>[] }) {
+  const saved = VIEWS[viewKey] ?? VIEWS["view:default"]
+  const [view, setView] = React.useState<DataTableView>(saved.view)
+  const [open, setOpen] = React.useState(true)
+  const [shown, setShown] = React.useState<Row[]>(ROWS)
+  const changed = JSON.stringify(view) !== JSON.stringify(saved.view)
+  const onShown = React.useCallback((rs: Row[]) => setShown(rs), [])
+  return (
+    <Card className="gap-0 overflow-hidden py-0">
+      <div className="flex items-start justify-between gap-4 px-4 pt-4 pb-3">
+        <h2 className="text-2xl font-semibold">{saved.name}</h2>
+        <div className="text-right">
+          <div className="text-2xl font-semibold tabular-nums">{money(shown.reduce((a, r) => a + r.amount, 0))}</div>
+          <div className="text-xs text-muted-foreground">{shown.length} expenses · PB&amp;J Chalet · 2026</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-4 pb-3">
+        {changed && <span className="text-xs text-muted-foreground">Changed</span>}
+        <Button variant="outline" size="icon-sm" aria-label={open ? "Hide view controls" : "Show view controls"}
+                aria-expanded={open} onClick={() => setOpen((o) => !o)} className="ml-auto"><GearIcon /></Button>
+      </div>
+      <DataTable rows={ROWS} cols={cols} groupings={groupings} filters={[groupings[1]]}
+                 defaultSort={{ key: "date", dir: "desc" }} rowKey={(r) => r.id} prefsKey="release-demo.views"
+                 noun="expense" controlsOpen={open} view={view} onViewChange={setView} onShownChange={onShown}
+                 panel={{
+                   start: <Button variant="outline" size="sm">Year 2026<ChevronDownIcon className="text-muted-foreground" /></Button>,
+                   end: <>
+                     <Button variant="ghost" size="sm" disabled={!changed} onClick={() => setView(saved.view)}>Revert</Button>
+                     <Button variant="outline" size="sm">Save as new view</Button>
+                     <Button size="sm" disabled={!changed || viewKey === "view:default"}>Save</Button>
+                   </>,
+                 }} />
+    </Card>
+  )
+}
+
+function ExpensesPage({ onAdd, viewKey }: { onAdd: () => void; viewKey: string }) {
   const phone = useShellPhone()
   const [state, setState] = React.useState<"ready" | "loading" | "empty" | "failed">("ready")
   const cols: Col<Row>[] = [
@@ -122,6 +168,8 @@ function ExpensesPage({ onAdd }: { onAdd: () => void }) {
           </>
         )}
       </Card>
+
+      <SavedViewDemo key={viewKey} viewKey={viewKey} cols={cols} groupings={groupings} />
     </div>
   )
 }
@@ -165,12 +213,15 @@ export default function ReleaseShowcase() {
   const [active, setActive] = React.useState("expenses")
   const [adding, setAdding] = React.useState(false)
   const [long, setLong] = React.useState(false)
-  const titles: Record<string, string> = { expenses: "Expenses", spending: "Spending", recurring: "Recurring", lists: "Lists", settings: "Settings" }
+  const titles: Record<string, string> = { expenses: "Expenses", "view:default": "Expenses", "view:supplies": "Expenses", spending: "Spending", recurring: "Recurring", lists: "Lists", settings: "Settings" }
   return (
     <Shell
       brand={{ icon: <ReceiptIcon className="size-4" />, name: "Expenses", sub: "Chalet · Innovations · Personal" }}
       nav={[
-        { key: "expenses", label: "Expenses", icon: ListIcon },
+        { key: "expenses", label: "Expenses", icon: ListIcon, children: [
+          { key: "view:default", label: "Default view" },
+          { key: "view:supplies", label: "Supplies by category", onDelete: () => toast.success("Deleted “Supplies by category”") },
+        ] },
         { key: "spending", label: "Spending", icon: ChartColumnIcon },
         { key: "recurring", label: "Recurring", icon: RepeatIcon },
         { key: "lists", label: "Lists", icon: TagsIcon, soon: true },
@@ -184,7 +235,8 @@ export default function ReleaseShowcase() {
       headerAction={active === "spending" ? { label: "Upload statement", icon: UploadIcon, onClick: () => {} } : undefined}
       primaryAction={{ label: "Add receipt", icon: CameraIcon, onClick: () => setAdding(true) }}
     >
-      {active === "expenses" ? <ExpensesPage onAdd={() => setAdding(true)} />
+      {active === "expenses" || active.startsWith("view:")
+        ? <ExpensesPage onAdd={() => setAdding(true)} viewKey={active.startsWith("view:") ? active : "view:default"} />
         : <Empty title={`${titles[active]} is a demo stub`} detail="Spending shows the one header action on a phone." />}
       <AddDialog open={adding} onOpenChange={setAdding} />
     </Shell>

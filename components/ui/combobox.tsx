@@ -163,6 +163,10 @@ function Picker({ label, options, value, onValueChange, searchPlaceholder = "Sea
     <Command label={label} filter={match} className={cn("flex flex-col",
       "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:pb-1",
       "[&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground",
+      // Options under a titled group indent 12px past its caption, so a caption reads as a
+      // heading by position (UX Designer Decisions (72)). An untitled group renders no
+      // heading, so its rows (and the "Add …" row) stay flush.
+      "[&_[cmdk-group-heading]+[cmdk-group-items]_[cmdk-item]]:pl-5",
       phone && "min-h-0 flex-1")}>
       <div className={cn("flex items-center gap-2 border-b border-border px-3", phone ? "mx-4 mb-2 h-11 rounded-lg border" : "h-9")}>
         <SearchIcon className="size-4 shrink-0 text-muted-foreground" />

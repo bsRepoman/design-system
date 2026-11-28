@@ -75,8 +75,10 @@ function Combobox(props: ComboboxProps) {
       disabled={disabled}
       className={cn("h-9 w-full justify-between px-3 font-normal max-[479px]:h-11 max-[479px]:text-[15px]", className)}
     >
+      {/* The value alone (UX Designer Decisions (72)): the group is a heading in the open
+          list, not part of the name, so a closed field reads "Travel meals", not
+          "Travel › Travel meals". */}
       <span className={cn("truncate", !shown && "text-muted-foreground")}>
-        {selected?.group && <span className="text-muted-foreground">{selected.group} › </span>}
         {shown ?? placeholder}
       </span>
       <ChevronDownIcon className="text-muted-foreground" />
